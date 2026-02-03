@@ -22,6 +22,7 @@ print("- ESC to exit\n")
 
 while True:
     ret, frame = cam.read()
+    frame = cv2.flip(frame, 1) # Mirror the frame
     if not ret:
         break
 

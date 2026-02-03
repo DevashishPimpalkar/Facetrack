@@ -25,6 +25,7 @@ print("FaceTrack Attendance Started (ESC to exit)")
 
 while True:
     ret, frame = cam.read()
+    frame = cv2.flip(frame, 1) # Mirror the frame
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     face_locations = face_recognition.face_locations(rgb)

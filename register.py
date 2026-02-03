@@ -4,43 +4,50 @@ import os
 name = input("Enter Student Name: ")
 roll = input("Enter Roll No: ")
 
-folder = f"dataset/{name}_{roll}"
+label_name = f"{name}_{roll}"
+folder = f"dataset/{label_name}"
 os.makedirs(folder, exist_ok=True)
 
-cam = cv2.VideoCapture(0)
-cam.set(3, 640)  # width
-cam.set(4, 480)  # height
+cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+face_cascade = cv2.CascadeClassifier(
+    cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+)
 
 count = 0
-MAX_IMAGES = 20
+MAX_IMAGES = 15
 
-print("\nInstructions:")
-print("- Look at camera normally")
-print("- Change angle slightly after every few shots")
-print("- Press 's' to save image")
-print("- ESC to exit\n")
+print("Press 's' to save face | ESC to exit")
 
 while True:
     ret, frame = cam.read()
-    frame = cv2.flip(frame, 1) # Mirror the frame
     if not ret:
-        break
+        continue
 
-    cv2.putText(frame, f"Images Captured: {count}/{MAX_IMAGES}",
-                (10, 30), cv2.FONT_HERSHEY_SIMPLEX,
-                0.8, (0, 255, 0), 2)
+    frame = cv2.flip(frame, 1)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    cv2.imshow("Face Registration - FaceTrack", frame)
+    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+
+    for (x, y, w, h) in faces:
+        face_img = gray[y:y+h, x:x+w]
+        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+        if count < MAX_IMAGES:
+            cv2.putText(frame, f"{count}/{MAX_IMAGES}",
+                        (10, 30), cv2.FONT_HERSHEY_SIMPLEX,
+                        1, (0, 255, 0), 2)
+
+    cv2.imshow("Face Registration", frame)
     key = cv2.waitKey(1) & 0xFF
 
-    if key == ord('s'):
+    if key == ord('s') and len(faces) == 1:
         count += 1
-        cv2.imwrite(f"{folder}/{count}.jpg", frame)
+        cv2.imwrite(f"{folder}/{count}.jpg", face_img)
         print(f"Saved image {count}")
-        
-    if count >= MAX_IMAGES or key == 27:
+
+    if key == 27 or count >= MAX_IMAGES:
         break
 
 cam.release()
 cv2.destroyAllWindows()
-print("✅ Dataset creation completed")
+print("✅ Dataset collection complete")

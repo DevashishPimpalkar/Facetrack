@@ -1,15 +1,20 @@
 import cv2
-import face_recognition
 import pickle
 import sqlite3
 from datetime import datetime
 
-with open("encodings/face_encodings.pkl", "rb") as f:
-    data = pickle.load(f)
+model = cv2.face.LBPHFaceRecognizer_create()
+model.read("models/lbph_model.xml")
+
+with open("models/labels.pkl", "rb") as f:
+    labels = pickle.load(f)
+
+face_cascade = cv2.CascadeClassifier(
+    cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+)
 
 conn = sqlite3.connect("database.db")
 cursor = conn.cursor()
-
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS attendance (
     name TEXT,
@@ -17,37 +22,50 @@ CREATE TABLE IF NOT EXISTS attendance (
     time TEXT
 )
 """)
+conn.commit()
 
-marked_today = set()
-cam = cv2.VideoCapture(0)
+cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+marked = set()
 
 print("FaceTrack Attendance Started (ESC to exit)")
 
 while True:
     ret, frame = cam.read()
-    frame = cv2.flip(frame, 1) # Mirror the frame
-    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    if not ret:
+        continue
 
-    face_locations = face_recognition.face_locations(rgb)
-    face_encodings = face_recognition.face_encodings(rgb, face_locations)
+    frame = cv2.flip(frame, 1)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    for enc in face_encodings:
-        matches = face_recognition.compare_faces(data["encodings"], enc)
-        if True in matches:
-            index = matches.index(True)
-            name = data["names"][index]
+    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+
+    for (x, y, w, h) in faces:
+        face_img = gray[y:y+h, x:x+w]
+        label, confidence = model.predict(face_img)
+
+        if confidence < 80:  # lower = better
+            name = labels[label]
+            cv2.putText(frame, name, (x, y-10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.9,
+                        (0, 255, 0), 2)
 
             today = datetime.now().strftime("%Y-%m-%d")
             time = datetime.now().strftime("%H:%M:%S")
 
-            if name not in marked_today:
+            if name not in marked:
                 cursor.execute(
                     "INSERT INTO attendance VALUES (?, ?, ?)",
                     (name, today, time)
                 )
                 conn.commit()
-                marked_today.add(name)
+                marked.add(name)
                 print(f"✅ Attendance marked for {name}")
+        else:
+            cv2.putText(frame, "Unknown", (x, y-10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.9,
+                        (0, 0, 255), 2)
+
+        cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
     cv2.imshow("FaceTrack - Attendance", frame)
     if cv2.waitKey(1) == 27:

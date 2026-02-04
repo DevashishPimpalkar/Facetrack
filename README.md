@@ -58,7 +58,7 @@ python recognize.py
 
 ---
 
-📁 Project Structure
+### 📁 Project Structure
 ```
 Facetrack/
 │── register.py          # Register new face data
@@ -69,4 +69,5 @@ Facetrack/
 │── requirements.txt     # Dependencies
 │── README.md
 ```
+
 

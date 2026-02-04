@@ -58,6 +58,7 @@ python recognize.py
 
 ---
 
+```
 📁 Project Structure
 Facetrack/
 │── register.py          # Register new face data
@@ -67,3 +68,4 @@ Facetrack/
 │── dataset/             # Stored face images (created after registering)
 │── requirements.txt     # Dependencies
 │── README.md
+```

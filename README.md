@@ -30,19 +30,33 @@ It allows you to **register new faces**, **train the model**, and then **identif
 ```bash
 git clone https://github.com/aditya-bobate/Facetrack.git
 cd Facetrack
+```
 
-▶️ Install dependencies
+### 2️⃣ Install dependencies
+```bash
 pip install -r requirements.txt
+```
 
-▶️ How to Run
+---
+
+### ▶️ How to Run
+
 🧍 Step 1: Register Face
+```bash
 python register.py
+```
 
 🏋️ Step 2: Train Model
+```bash
 python train_model.py
+```
 
 👁️ Step 3: Start Face Recognition
+```bash
 python recognize.py
+```
+
+---
 
 📁 Project Structure
 Facetrack/
@@ -53,11 +67,3 @@ Facetrack/
 │── dataset/             # Stored face images (created after registering)
 │── requirements.txt     # Dependencies
 │── README.md
-
-📄 License
-
----
-
-If you want, I can also make it **more advanced README** with:
-⭐ badges, screenshots section, demo gif, and proper license text.
-

@@ -58,8 +58,8 @@ python recognize.py
 
 ---
 
-```
 📁 Project Structure
+```
 Facetrack/
 │── register.py          # Register new face data
 │── train_model.py       # Train the face recognition model
@@ -69,3 +69,4 @@ Facetrack/
 │── requirements.txt     # Dependencies
 │── README.md
 ```
+
